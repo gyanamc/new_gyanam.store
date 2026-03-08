@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Agent - GyanaM Store</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+
+    form {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 4px;
+      border: none;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    input {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    textarea {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      resize: vertical;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #64ffda;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error-message {
+      background: rgba(255, 107, 107, 0.1);
+      border: 1px solid rgba(255, 107, 107, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 15px;
+      color: #ff6b6b;
+    }
+
+    .retry-button {
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-top: 8px;
+      transition: background 0.3s ease;
+    }
+
+    .retry-button:hover {
+      background: #e55a5a;
+    }
+
+    #result h1, #result h2, #result h3 {
+      color: #64ffda;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    #result h1 { font-size: 1.5rem; }
+    #result h2 { font-size: 1.3rem; }
+    #result h3 { font-size: 1.1rem; }
+
+    #result p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    #result ul, #result ol {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    #result li {
+      margin-bottom: 0.5rem;
+    }
+
+    #result code {
+      background: rgba(0, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      color: #64ffda;
+    }
+
+    #result pre {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+
+    #result pre code {
+      background: none;
+      padding: 0;
+    }
+
+    #result blockquote {
+      border-left: 4px solid #64ffda;
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: #b0b0b0;
+      font-style: italic;
+    }
+
+    #result strong {
+      color: #bb86fc;
+      font-weight: bold;
+    }
+
+    #result em {
+      color: #ff6b6b;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <h1>📨 Email Agent</h1>
+  <p>This AI agent reads customer emails and generates professional replies using support policy.</p>
+
+  <form id="emailForm">
+    <input type="text" id="subject" placeholder="Email Subject" required />
+    <textarea id="body" placeholder="Paste email body here..." rows="6" required></textarea>
+    <input type="text" id="from" placeholder="Your Name (optional)" />
+    <button type="submit">Generate Response</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    const form = document.getElementById('emailForm');
+    const resultBox = document.getElementById('result');
+    const submitButton = form.querySelector('button');
+
+    let lastRequest = null;
+
+    function setLoading(loading) {
+      submitButton.disabled = loading;
+      if (loading) {
+        submitButton.innerHTML = '<span class="loading-spinner"></span>Generating...';
+      } else {
+        submitButton.innerHTML = 'Generate Response';
+      }
+    }
+
+    function showError(message) {
+      resultBox.innerHTML = `
+        <div class="error-message">
+          ${message}
+          <button class="retry-button" onclick="retryLastRequest()">Retry</button>
+        </div>
+      `;
+    }
+
+    function retryLastRequest() {
+      if (lastRequest) {
+        processEmailRequest(lastRequest.subject, lastRequest.body, lastRequest.from);
+      }
+    }
+
+    async function processEmailRequest(subject, body, from) {
+      lastRequest = { subject, body, from };
+      setLoading(true);
+      resultBox.innerHTML = '<div style="text-align: center; color: #64ffda;">⏳ Analyzing email and generating response...</div>';
+
+      try {
+        const res = await fetch('https://primary-production-da3f.up.railway.app/webhook/email-agent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subject, body, from })
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+
+        const result = await res.json();
+        const responseText = result.response || JSON.stringify(result);
+        resultBox.innerHTML = `<strong>AI Response:</strong><br><br>${marked.parse(responseText)}`;
+      } catch (err) {
+        console.error('Email agent error:', err);
+        showError(`❌ ${err.message || 'Failed to generate response. Please try again.'}`);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const subject = document.getElementById('subject').value;
+      const body = document.getElementById('body').value;
+      const from = document.getElementById('from').value;
+
+      await processEmailRequest(subject, body, from);
+    });
+  </script>
+</body>
+</html>
