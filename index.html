@@ -52,8 +52,54 @@
     .hero-content {
       position: relative;
       z-index: 2;
-      max-width: 800px;
+      max-width: 1000px;
       padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-text {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .profile-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .profile-image {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 4px solid rgba(100, 255, 218, 0.3);
+      box-shadow: 0 8px 32px rgba(100, 255, 218, 0.2);
+      transition: all 0.3s ease;
+      object-fit: cover;
+    }
+
+    .profile-image:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 40px rgba(100, 255, 218, 0.4);
+      border-color: #64ffda;
+    }
+
+    .profile-name {
+      font-size: 1.2rem;
+      color: #64ffda;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .profile-title {
+      font-size: 0.9rem;
+      color: #b0b0b0;
+      text-align: center;
+      margin-bottom: 1rem;
     }
 
     .hero h1 {
@@ -667,10 +713,41 @@
       color: var(--text-secondary);
     }
 
+    [data-theme="light"] .profile-image {
+      border-color: rgba(0, 123, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 123, 255, 0.2);
+    }
+
+    [data-theme="light"] .profile-image:hover {
+      border-color: var(--text-accent);
+      box-shadow: 0 12px 40px rgba(0, 123, 255, 0.4);
+    }
+
+    [data-theme="light"] .profile-name {
+      color: var(--text-accent);
+    }
+
+    [data-theme="light"] .profile-title {
+      color: var(--text-secondary);
+    }
+
     /* Mobile responsiveness */
     @media (max-width: 768px) {
       .hero {
-        height: 90vh;
+        height: auto;
+        min-height: 90vh;
+        padding: 100px 0 50px;
+      }
+
+      .hero-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 2rem;
+      }
+
+      .profile-image {
+        width: 150px;
+        height: 150px;
       }
 
       .nav-container {
@@ -825,9 +902,16 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-content">
-      <h1>GyanaM Store</h1>
-      <p>AI Automation Hub by Kumar Gyanam</p>
-      <a href="#featured" class="cta-button">Explore Tools</a>
+      <div class="hero-text">
+        <h1>GyanaM Store</h1>
+        <p>AI Automation Hub by Kumar Gyanam</p>
+        <a href="#featured" class="cta-button">Explore Tools</a>
+      </div>
+      <div class="profile-section">
+        <img src="https://gyanam.store/kumar-gyanam.jpeg" alt="Kumar Gyanam" class="profile-image" loading="lazy">
+        <div class="profile-name">Kumar Gyanam</div>
+        <div class="profile-title">GenAI & Automation Architect</div>
+      </div>
     </div>
   </section>
 
